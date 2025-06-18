@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import Notification from './components/Notification'
+
+import './index.css'
 
 
 const App = () => {
@@ -9,6 +12,11 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+
+  // Estados de las Notificaciones
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
+
   // Nuevos estados para los campos del formulario de creación de blog
   const [newTitle, setNewTitle] = useState('')
   const [newAuthor, setNewAuthor] = useState('')
@@ -60,10 +68,14 @@ const App = () => {
       setUser(loggedInUser)
       setUsername('')
       setPassword('')
+      setSuccessMessage(`Welcome, ${loggedInUser.name}!`)
+      setTimeout(() => { setSuccessMessage(null) }, 5000)
       console.log('Login exitoso:', loggedInUser) // Para depuración
     } catch (exception) {
       // Si hay un error, muestra un mensaje de error
-      console.error('Error de login:', exception) // Para depuración
+      setErrorMessage('Wrong credentials')
+      console.error('Error de login:', exception)
+      setTimeout(() => { setErrorMessage(null) }, 5000)
     }
   }
 
@@ -73,6 +85,10 @@ const App = () => {
     window.localStorage.removeItem('loggedBlogappUser') // Elimina del localStorage
     setUser(null) // Limpia el estado del usuario
     blogService.setToken(null) // Limpia el token en el servicio
+    setSuccessMessage('Logged out successfully.')
+    setTimeout(() => { // Oculta el mensaje de éxito después de 5 segundos
+      setSuccessMessage(null)
+    }, 5000)
     console.log('Sesión cerrada.')
   }
 
@@ -101,10 +117,23 @@ const App = () => {
       setNewAuthor('')
       setNewUrl('')
 
+      // Muestra un mensaje de éxito al usuario
+      setSuccessMessage(`A new blog "${returnedBlog.title}" by ${returnedBlog.author} added!`)
+      setTimeout(() => { // Oculta el mensaje de éxito después de 5 segundos
+        setSuccessMessage(null)
+      }, 5000)
+      // Mensaje de depuración en consola
       console.log('Blog creado:', returnedBlog)
 
     } catch (exception) {
+      // En caso de error al crear el blog, muestra un mensaje de error
+      // Intenta extraer un mensaje de error específico de la respuesta del backend
+      setErrorMessage(`Error creating blog: ${exception.response?.data?.error || exception.message}`)
+      // Mensaje de error en consola para depuración
       console.error('Error al crear blog:', exception)
+      setTimeout(() => { // Oculta el mensaje de error después de 5 segundos
+        setErrorMessage(null)
+      }, 5000)
     }
   }
 
@@ -180,6 +209,10 @@ const App = () => {
   if (user === null) {
     return (
       <div>
+        {/* Renderiza el componente Notification para mensajes de error o éxito */}
+        {/* Solo uno se mostrará a la vez, ya que los mensajes se borran mutuamente */}
+        <Notification message={errorMessage} type="error" />
+        <Notification message={successMessage} type="success" />
         {loginForm()}
       </div>
     )
@@ -189,6 +222,9 @@ const App = () => {
   //! Si el usuario está logueado, muestra el nombre del usuario y la lista de blogs
   return (
     <div>
+      {/* Renderiza el componente Notification para mensajes de error o éxito */}
+      <Notification message={errorMessage} type="error" />
+      <Notification message={successMessage} type="success" />
       <h2>Blogs</h2>
       <p>
         {/* Muestra el nombre del usuario */}
