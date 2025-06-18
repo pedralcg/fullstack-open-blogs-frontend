@@ -11,9 +11,21 @@ const App = () => {
   const [user, setUser] = useState(null)
 
 
-  //! useEffect para cargar blogs (solo si el usuario está logueado)
+  //! useEffect para Cargar la Sesión desde localStorage al inicio ---
   useEffect(() => {
-    // Solo intenta cargar los blogs si hay un usuario logueado
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user) // Restaura el estado del usuario
+      blogService.setToken(user.token) // Establece el token en el servicio de blogs
+      console.log('Sesión restaurada desde localStorage para:', user.username)
+    }
+  }, []) // Se ejecuta solo una vez al montar el componente
+
+
+  //! useEffect para cargar blogs (token en blogService)
+  useEffect(() => {
+    // Solo carga los blogs si hay un usuario logueado
     if (user) {
       blogService.getAll().then(blogs =>
         setBlogs( blogs )
@@ -22,7 +34,7 @@ const App = () => {
   }, [user])
 
 
-  //! Función para manejar el envío del formulario de login
+  //! Función para Manejar el Inicio de Sesión
   const handleLogin = async (event) => {
     event.preventDefault() // Evita que la página se recargue
 
@@ -31,6 +43,14 @@ const App = () => {
       const loggedInUser = await loginService.login({
         username, password,
       })
+
+      // Guarda el objeto de usuario en localStorage
+      window.localStorage.setItem(
+        'loggedBlogappUser', JSON.stringify(loggedInUser)
+      )
+
+      // Establece el token en el servicio
+      blogService.setToken(loggedInUser.token)
 
       // Si el login es exitoso, actualiza el estado 'user' y limpia los campos
       setUser(loggedInUser)
@@ -42,6 +62,16 @@ const App = () => {
       console.error('Error de login:', exception) // Para depuración
     }
   }
+
+
+  //! Función para Manejar el Cerrar Sesión
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedBlogappUser') // Elimina del localStorage
+    setUser(null) // Limpia el estado del usuario
+    blogService.setToken(null) // Limpia el token en el servicio
+    console.log('Sesión cerrada.')
+  }
+
 
   //! --- Renderizado condicional ---
   // Si no hay usuario (user es null), muestra el formulario de login
@@ -79,7 +109,12 @@ const App = () => {
   return (
     <div>
       <h2>Blogs</h2>
-      <p>{user.name} logged in</p> {/* Muestra el nombre del usuario */}
+      <p>
+        {/* Muestra el nombre del usuario */}
+        {user.name} logged in {' '}
+        {/* Botón de cerrar sesión */}
+        <button onClick={handleLogout}>logout</button> 
+      </p> 
       {/* Aquí podrías añadir un botón de "logout" en futuros ejercicios */}
 
       {blogs.map(blog =>
