@@ -3,24 +3,26 @@ const baseUrl = '/api/blogs'
 
 let token = null // Variable para almacenar el token
 
-/**
- * Establece el token de autenticación para futuras solicitudes.
- * @param {string} newToken - El token JWT.
- */
+
 const setToken = newToken => {
   token = `Bearer ${newToken}` // Guarda el token con el prefijo "Bearer "
 }
 
-const getAll = async () => {
-  // Para GET ALL, el backend aún no requiere token.
-  // Sin embargo, si lo hiciera, lo enviaríamos así:
-  // const config = {
-  //   headers: { Authorization: token },
-  // }
-  // const request = await axios.get(baseUrl, config)
 
+const getAll = async () => {
   const request = await axios.get(baseUrl)
   return request.data
 }
 
-export default { getAll, setToken }
+
+const create = async newObject => {
+  const config = {
+    headers: { Authorization: token }, // Incluye el token en los encabezados de autorización
+  }
+  // Realiza una petición POST al servidor con el objeto del blog y la configuración de autenticación
+  const response = await axios.post(baseUrl, newObject, config)
+  return response.data // Devuelve los datos del blog creado por el servidor
+}
+
+
+export default { getAll, setToken, create }

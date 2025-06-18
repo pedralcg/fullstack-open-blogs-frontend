@@ -9,6 +9,10 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  // Nuevos estados para los campos del formulario de creación de blog
+  const [newTitle, setNewTitle] = useState('')
+  const [newAuthor, setNewAuthor] = useState('')
+  const [newUrl, setNewUrl] = useState('')
 
 
   //! useEffect para Cargar la Sesión desde localStorage al inicio ---
@@ -73,33 +77,110 @@ const App = () => {
   }
 
 
+//! Función para Manejar la Creación de un Nuevo Blog
+  const handleCreateBlog = async (event) => {
+    event.preventDefault() // Evita que la página se recargue
+
+    try {
+      const blogObject = {
+        title: newTitle,
+        author: newAuthor,
+        url: newUrl,
+        // likes: 0 // El backend asigna 0 por defecto si no se envía
+      }
+
+      const returnedBlog = await blogService.create(blogObject) // Envía el nuevo blog al backend
+
+      // Actualiza la lista de blogs en el estado de React
+      // Asegúrate de que el blog devuelto tenga el campo 'user' populado para que Blog componente funcione.
+      // El backend debería popularlo si lo configuraste así en el POST /api/blogs.
+      setBlogs(blogs.concat(returnedBlog))
+
+      // Limpia los campos del formulario
+      setNewTitle('')
+      setNewAuthor('')
+      setNewUrl('')
+
+      console.log('Blog creado:', returnedBlog)
+
+    } catch (exception) {
+      console.error('Error al crear blog:', exception)
+    }
+  }
+
+
+  //! Formulario de inicio de sesión
+  const loginForm = () => (
+    <div>
+      <h2>Log in to application</h2>
+      <form onSubmit={handleLogin}>
+        <div>
+          username
+          <input
+            type="text"
+            value={username}
+            name="Username"
+            onChange={({ target }) => setUsername(target.value)}
+          />
+        </div>
+        <div>
+          password
+          <input
+            type="password"
+            value={password}
+            name="Password"
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </div>
+        <button type="submit">login</button>
+      </form>
+    </div>
+  )
+
+  //! Formulario de creación de blog
+  const blogForm = () => (
+    <div style={{ marginBottom: '20px' }}> {/* Añade un poco de espacio */}
+      <h2>create new</h2>
+      <form onSubmit={handleCreateBlog}>
+        <div>
+          Title:
+          <input
+            type="text"
+            value={newTitle}
+            name="Title"
+            onChange={({ target }) => setNewTitle(target.value)}
+          />
+        </div>
+        <div>
+          Author:
+          <input
+            type="text"
+            value={newAuthor}
+            name="Author"
+            onChange={({ target }) => setNewAuthor(target.value)}
+          />
+        </div>
+        <div>
+          Url:
+          <input
+            type="text"
+            value={newUrl}
+            name="Url"
+            onChange={({ target }) => setNewUrl(target.value)}
+          />
+        </div>
+        <button type="submit">create</button>
+      </form>
+    </div>
+  )
+
+
   //! --- Renderizado condicional ---
-  // Si no hay usuario (user es null), muestra el formulario de login
+  //! Si no hay usuario (user es null), muestra el formulario de login
   if (user === null) {
     return (
       <div>
-        <h2>Log in to application</h2>
-        <form onSubmit={handleLogin}>
-          <div>
-            username
-            <input
-              type="text"
-              value={username}
-              name="Username"
-              onChange={({ target }) => setUsername(target.value)}
-            />
-          </div>
-          <div>
-            password
-            <input
-              type="password"
-              value={password}
-              name="Password"
-              onChange={({ target }) => setPassword(target.value)}
-            />
-          </div>
-          <button type="submit">login</button>
-        </form>
+        {loginForm()}
       </div>
     )
   }
@@ -115,8 +196,9 @@ const App = () => {
         {/* Botón de cerrar sesión */}
         <button onClick={handleLogout}>logout</button> 
       </p> 
-      {/* Aquí podrías añadir un botón de "logout" en futuros ejercicios */}
-
+      {/* Muestra el formulario de creación de blog */}
+      {blogForm()}
+      
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
