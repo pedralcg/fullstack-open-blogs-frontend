@@ -14,7 +14,11 @@ const getAll = async () => {
   return request.data
 }
 
-
+/**
+ * Envía un nuevo blog al servidor.
+ * @param {object} newObject - El objeto del blog a crear (title, author, url, likes).
+ * @returns {Promise<object>} Una promesa que se resuelve con el blog creado, o se rechaza con un error.
+ */
 const create = async newObject => {
   const config = {
     headers: { Authorization: token }, // Incluye el token en los encabezados de autorización
@@ -24,5 +28,20 @@ const create = async newObject => {
   return response.data // Devuelve los datos del blog creado por el servidor
 }
 
+/**
+ * Actualiza un blog existente en el servidor.
+ * @param {string} id - El ID del blog a actualizar.
+ * @param {object} updatedObject - El objeto del blog con los campos actualizados.
+ * @returns {Promise<object>} Una promesa que se resuelve con el blog actualizado, o se rechaza con un error.
+ */
+const update = async (id, updatedObject) => { // <-- ¡NUEVA FUNCIÓN UPDATE!
+  const config = {
+    headers: { Authorization: token }, // Incluye el token en los encabezados de autorización (si PUT lo requiere)
+  }
+  // Realiza una petición PUT a la URL específica del blog con el objeto actualizado y la configuración de autenticación
+  const response = await axios.put(`${baseUrl}/${id}`, updatedObject, config)
+  return response.data // Devuelve los datos del blog actualizado por el servidor
+}
 
-export default { getAll, setToken, create }
+
+export default { getAll, setToken, create, update }

@@ -36,13 +36,16 @@ const App = () => {
   }, []) // Se ejecuta solo una vez al montar el componente
 
 
-  //! useEffect para cargar blogs (token en blogService)
+  //! useEffect para Cargar Blogs (ordenados por likes) 
+  // ¡IMPORTANTE! Asegúrate de que el backend siempre devuelva 'user' como un objeto populate, no solo como un ID.
+  // Si el backend no lo hace, el blog.user.name fallará en el frontend.
   useEffect(() => {
-    // Solo carga los blogs si hay un usuario logueado
     if (user) {
-      blogService.getAll().then(blogs =>
-        setBlogs( blogs )
-      ) 
+      blogService.getAll().then(blogs => {
+        // Ordena los blogs por número de likes de mayor a menor
+        const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
+        setBlogs(sortedBlogs)
+      })
     }
   }, [user])
 
@@ -94,7 +97,7 @@ const App = () => {
   }
 
 
-//! Función para Manejar la Creación de un Nuevo Blog
+  //! Función para Manejar la Creación de un Nuevo Blog
   // Ahora esta función recibe directamente el blogObject desde BlogForm
   const addBlog = async (blogObject) => { // <-- Cambiado el nombre y recibe blogObject
     try {
@@ -112,6 +115,34 @@ const App = () => {
     } catch (exception) {
       setErrorMessage(`Error creating blog: ${exception.response?.data?.error || exception.message}`)
       console.error('Error al crear blog:', exception)
+      setTimeout(() => { setErrorMessage(null) }, 5000)
+    }
+  }
+
+  //! Función para manejar el Like de un Blog
+  const updateBlog = async (blogToUpdate) => { // Recibe el blog actualizado del componente Blog
+    try {
+      // Llama al servicio de blogs para actualizar el blog en el backend
+      const returnedBlog = await blogService.update(blogToUpdate.id, blogToUpdate)
+
+      // Actualiza el estado local de 'blogs' con el blog actualizado
+      // Reemplaza el blog antiguo por el actualizado y re-ordena la lista.
+      setBlogs(prevBlogs => {
+        const updatedBlogs = prevBlogs.map(blog =>
+          blog.id === blogToUpdate.id // Si es el blog que se actualizó
+            ? returnedBlog // Usa los datos devueltos por el servidor (ya que el backend puede haber hecho algo más)
+            : blog // Sino, mantén el blog original
+        )
+        return updatedBlogs.sort((a, b) => b.likes - a.likes) // Mantiene el orden por likes
+      })
+
+      setSuccessMessage(`You liked "${returnedBlog.title}"! Likes: ${returnedBlog.likes}`)
+      setTimeout(() => { setSuccessMessage(null) }, 5000)
+      console.log('Blog actualizado (like):', returnedBlog)
+
+    } catch (exception) {
+      setErrorMessage(`Error liking blog: ${exception.response?.data?.error || exception.message}`)
+      console.error('Error al dar like:', exception)
       setTimeout(() => { setErrorMessage(null) }, 5000)
     }
   }
@@ -185,7 +216,10 @@ const App = () => {
       {blogForm()}
       
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog
+        key={blog.id}
+        blog={blog}
+        handleLike={updateBlog} />
       )}
     </div>
   )
