@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
+import Togglable from './components/Togglable'
+import BlogForm from './components/BlogForm'
+
 
 import './index.css'
 
@@ -17,10 +20,8 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
 
-  // Nuevos estados para los campos del formulario de creación de blog
-  const [newTitle, setNewTitle] = useState('')
-  const [newAuthor, setNewAuthor] = useState('')
-  const [newUrl, setNewUrl] = useState('')
+  // Nueva ref para el componente Togglable
+  const blogFormRef = useRef()
 
 
   //! useEffect para Cargar la Sesión desde localStorage al inicio ---
@@ -94,46 +95,24 @@ const App = () => {
 
 
 //! Función para Manejar la Creación de un Nuevo Blog
-  const handleCreateBlog = async (event) => {
-    event.preventDefault() // Evita que la página se recargue
-
+  // Ahora esta función recibe directamente el blogObject desde BlogForm
+  const addBlog = async (blogObject) => { // <-- Cambiado el nombre y recibe blogObject
     try {
-      const blogObject = {
-        title: newTitle,
-        author: newAuthor,
-        url: newUrl,
-        // likes: 0 // El backend asigna 0 por defecto si no se envía
-      }
+      // --- ¡Llama a la función para ocultar el formulario! ---
+      blogFormRef.current.toggleVisibility() // Esto oculta el Togglable/BlogForm
 
-      const returnedBlog = await blogService.create(blogObject) // Envía el nuevo blog al backend
+      const returnedBlog = await blogService.create(blogObject)
 
-      // Actualiza la lista de blogs en el estado de React
-      // Asegúrate de que el blog devuelto tenga el campo 'user' populado para que Blog componente funcione.
-      // El backend debería popularlo si lo configuraste así en el POST /api/blogs.
       setBlogs(blogs.concat(returnedBlog))
 
-      // Limpia los campos del formulario
-      setNewTitle('')
-      setNewAuthor('')
-      setNewUrl('')
-
-      // Muestra un mensaje de éxito al usuario
       setSuccessMessage(`A new blog "${returnedBlog.title}" by ${returnedBlog.author} added!`)
-      setTimeout(() => { // Oculta el mensaje de éxito después de 5 segundos
-        setSuccessMessage(null)
-      }, 5000)
-      // Mensaje de depuración en consola
+      setTimeout(() => { setSuccessMessage(null) }, 5000)
       console.log('Blog creado:', returnedBlog)
 
     } catch (exception) {
-      // En caso de error al crear el blog, muestra un mensaje de error
-      // Intenta extraer un mensaje de error específico de la respuesta del backend
       setErrorMessage(`Error creating blog: ${exception.response?.data?.error || exception.message}`)
-      // Mensaje de error en consola para depuración
       console.error('Error al crear blog:', exception)
-      setTimeout(() => { // Oculta el mensaje de error después de 5 segundos
-        setErrorMessage(null)
-      }, 5000)
+      setTimeout(() => { setErrorMessage(null) }, 5000)
     }
   }
 
@@ -168,39 +147,9 @@ const App = () => {
 
   //! Formulario de creación de blog
   const blogForm = () => (
-    <div style={{ marginBottom: '20px' }}> {/* Añade un poco de espacio */}
-      <h2>create new</h2>
-      <form onSubmit={handleCreateBlog}>
-        <div>
-          Title:
-          <input
-            type="text"
-            value={newTitle}
-            name="Title"
-            onChange={({ target }) => setNewTitle(target.value)}
-          />
-        </div>
-        <div>
-          Author:
-          <input
-            type="text"
-            value={newAuthor}
-            name="Author"
-            onChange={({ target }) => setNewAuthor(target.value)}
-          />
-        </div>
-        <div>
-          Url:
-          <input
-            type="text"
-            value={newUrl}
-            name="Url"
-            onChange={({ target }) => setNewUrl(target.value)}
-          />
-        </div>
-        <button type="submit">create</button>
-      </form>
-    </div>
+    <Togglable buttonLabel="create new blog" ref={blogFormRef}> {/* <-- Envuelto en Togglable */}
+      <BlogForm createBlog={addBlog} /> {/* <-- Usa el nuevo componente BlogForm */}
+    </Togglable>
   )
 
 
@@ -232,7 +181,7 @@ const App = () => {
         {/* Botón de cerrar sesión */}
         <button onClick={handleLogout}>logout</button> 
       </p> 
-      {/* Muestra el formulario de creación de blog */}
+      {/* Muestra el Togglable/BlogForm */}
       {blogForm()}
       
       {blogs.map(blog =>
