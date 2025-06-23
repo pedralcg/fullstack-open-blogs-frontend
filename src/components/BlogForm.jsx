@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import React from 'react' // Asegúrate de importar React
+import React from 'react'
 
 /**
  * Componente BlogForm: Formulario para crear un nuevo blog.
