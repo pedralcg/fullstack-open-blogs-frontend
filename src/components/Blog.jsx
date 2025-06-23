@@ -3,12 +3,14 @@ import React from 'react' // Asegúrate de importar React
 
 /**
  * Componente Blog: Muestra un blog individual y permite alternar la visualización de sus detalles.
- * También implementa la funcionalidad de "like".
+ * También implementa la funcionalidad de "like" y "delete" (condicional).
  * @param {object} props - Las props del componente.
  * @param {object} props.blog - El objeto blog a mostrar (debe contener title, author, url, likes, user).
  * @param {function} props.handleLike - Función callback que se llama para manejar el "like" de un blog.
+ * @param {function} props.handleDelete - Función callback que se llama para manejar la eliminación de un blog.
+ * @param {object} props.currentUser - El objeto del usuario actualmente logueado (para decidir si mostrar el botón de eliminar).
  */
-const Blog = ({ blog, handleLike }) => {
+const Blog = ({ blog, handleLike, handleDelete, currentUser }) => {
   // Estado para controlar la visibilidad de los detalles del blog.
   const [showDetails, setShowDetails] = useState(false)
 
@@ -26,7 +28,7 @@ const Blog = ({ blog, handleLike }) => {
     setShowDetails(!showDetails) // Invierte el valor actual de showDetails
   }
 
-  // Función para manejar el clic en el botón "like".
+  //? Función para manejar el clic en el botón "like".
   // Llama a la función handleLike pasada como prop desde el componente padre (App.jsx).
   const incrementLike = () => {
     // Crea un objeto con los datos actualizados del blog.
@@ -44,6 +46,13 @@ const Blog = ({ blog, handleLike }) => {
     }
     handleLike(updatedBlog) // Llama al callback con el blog actualizado
   }
+
+  //? Lógica para decidir si mostrar el botón de eliminar.
+  // El botón se muestra si:
+  // 1. Hay un usuario logueado (currentUser).
+  // 2. El blog tiene un usuario asociado (blog.user).
+  // 3. El ID del usuario que creó el blog coincide con el ID del usuario logueado.
+  const showDeleteButton = blog.user && currentUser && blog.user.username === currentUser.username
 
   return (
     // Contenedor principal del blog con los estilos definidos
@@ -69,6 +78,11 @@ const Blog = ({ blog, handleLike }) => {
           </p>
           {/* Verifica si blog.user existe antes de intentar acceder a blog.user.name */}
           {blog.user && <p>{blog.user.name}</p>}
+
+          {/* Renderizado condicional del botón de eliminar */}
+          {showDeleteButton && (
+            <button onClick={() => handleDelete(blog)}>remove</button> // <-- ¡Botón de eliminar!
+          )}
         </div>
       )}
     </div>

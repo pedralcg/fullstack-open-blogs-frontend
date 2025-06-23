@@ -43,5 +43,18 @@ const update = async (id, updatedObject) => { // <-- ¡NUEVA FUNCIÓN UPDATE!
   return response.data // Devuelve los datos del blog actualizado por el servidor
 }
 
+/**
+ * Elimina un blog del servidor.
+ * @param {string} id - El ID del blog a eliminar.
+ * @returns {Promise<object>} Una promesa que se resuelve con la respuesta de la eliminación, o se rechaza con un error.
+ */
+const remove = async (id) => {
+  const config = {
+    headers: { Authorization: token }, // El token es necesario para la autenticación en la eliminación
+  }
+  // Realiza una petición DELETE al endpoint específico del blog (baseUrl + id) con el token de autorización
+  const response = await axios.delete(`${baseUrl}/${id}`, config) // Petición DELETE
+  return response.data
+}
 
-export default { getAll, setToken, create, update }
+export default { getAll, setToken, create, update, remove }

@@ -147,6 +147,40 @@ const App = () => {
   }
 
 
+  //! Función para manejar la Eliminación de un Blog
+  const handleDeleteBlog = async (blogToDelete) => { // Recibe el blog a eliminar
+    // Confirma con el usuario antes de proceder
+    if (window.confirm(`Remove blog "${blogToDelete.title}" by ${blogToDelete.author}?`)) {
+      try {
+        await blogService.remove(blogToDelete.id) // Llama al servicio para eliminar el blog
+
+        // Actualiza el estado local filtrando el blog eliminado
+        setBlogs(prevBlogs => prevBlogs.filter(blog => blog.id !== blogToDelete.id))
+
+        setSuccessMessage(`Blog "${blogToDelete.title}" successfully removed!`)
+        setTimeout(() => { setSuccessMessage(null) }, 5000)
+        console.log('Blog eliminado:', blogToDelete)
+
+      } catch (exception) {
+        // Manejo de errores para la eliminación
+        console.error('Error deleting blog:', exception)
+        if (exception.response && exception.response.status === 401) {
+          setErrorMessage('You are not authorized to delete this blog. Please log in as the creator.')
+        } else if (exception.response && exception.response.status === 403) {
+          setErrorMessage('You are not authorized to delete this blog.')
+        } else if (exception.response && exception.response.status === 404) {
+          setErrorMessage(`Blog "${blogToDelete.title}" has already been removed from the server.`)
+          // Si el blog ya no está en el servidor, lo quitamos del UI de todos modos
+          setBlogs(prevBlogs => prevBlogs.filter(blog => blog.id !== blogToDelete.id))
+        } else {
+          setErrorMessage(`Error deleting blog: ${exception.response?.data?.error || exception.message}`)
+        }
+        setTimeout(() => { setErrorMessage(null) }, 5000)
+      }
+    }
+  }
+
+
   //! Formulario de inicio de sesión
   const loginForm = () => (
     <div>
@@ -216,9 +250,12 @@ const App = () => {
       
       {blogs.map(blog =>
         <Blog
-        key={blog.id}
-        blog={blog}
-        handleLike={updateBlog} />
+          key={blog.id}
+          blog={blog}
+          handleLike={updateBlog}
+          handleDelete={handleDeleteBlog}
+          currentUser={user}
+        />
       )}
     </div>
   )
