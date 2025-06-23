@@ -6,7 +6,6 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
 
-
 import './index.css'
 
 
