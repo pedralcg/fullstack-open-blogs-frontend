@@ -1,5 +1,7 @@
 import { useState } from 'react' // Importa useState para gestionar el estado de visibilidad
 import React from 'react' // Asegúrate de importar React
+import PropTypes from 'prop-types' // Importa PropTypes para validación de props
+
 
 /**
  * Componente Blog: Muestra un blog individual y permite alternar la visualización de sus detalles.
@@ -87,6 +89,37 @@ const Blog = ({ blog, handleLike, handleDelete, currentUser }) => {
       )}
     </div>
   )
+}
+
+//! Definición de PropTypes para el componente Blog
+// ! Definición de PropTypes para el componente Blog
+Blog.propTypes = {
+  // 1. Definición de la prop 'blog'
+  blog: PropTypes.shape({
+    title: PropTypes.string.isRequired,   // 'title' debe ser un string y es obligatorio
+    author: PropTypes.string.isRequired,  // 'author' debe ser un string y es obligatorio
+    url: PropTypes.string.isRequired,     // 'url' debe ser un string y es obligatorio
+    likes: PropTypes.number.isRequired,   // 'likes' debe ser un número y es obligatorio
+    // 2. Definición de la propiedad 'user' dentro del objeto 'blog'
+    user: PropTypes.shape({
+      username: PropTypes.string.isRequired, // 'username' debe ser un string y es obligatorio
+      name: PropTypes.string.isRequired,     // 'name' debe ser un string y es obligatorio
+      id: PropTypes.string.isRequired,       // 'id' debe ser un string y es obligatorio
+    }).isRequired, // El objeto 'user' completo es obligatorio
+    id: PropTypes.string.isRequired,      // 'id' (del blog) debe ser un string y es obligatorio
+  }).isRequired, // El objeto 'blog' completo es obligatorio
+
+  // 3. Definición de la prop 'handleLike'
+  handleLike: PropTypes.func.isRequired, // 'handleLike' debe ser una función y es obligatorio
+
+  // 4. Definición de la prop 'handleDelete'
+  handleDelete: PropTypes.func.isRequired, // 'handleDelete' debe ser una función y es obligatorio
+
+  // 5. Definición de la prop 'currentUser'
+  currentUser: PropTypes.shape({
+    username: PropTypes.string.isRequired, // 'username' debe ser un string y es obligatorio
+    name: PropTypes.string.isRequired,     // 'name' debe ser un string y es obligatorio
+  }).isRequired, // El objeto 'currentUser' completo es obligatorio
 }
 
 export default Blog

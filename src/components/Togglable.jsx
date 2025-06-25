@@ -1,5 +1,7 @@
 import { useState, forwardRef, useImperativeHandle } from 'react'
 import React from 'react' // Asegúrate de importar React
+import PropTypes from 'prop-types' // Importa PropTypes para validación de props
+
 
 /**
  * Componente Togglable: Gestiona la visibilidad de su contenido hijo.
@@ -42,5 +44,14 @@ const Togglable = forwardRef((props, refs) => {
     </div>
   )
 })
+
+//! Definición de PropTypes para el componente Togglable
+Togglable.propTypes = {
+  buttonLabel: PropTypes.string.isRequired, // buttonLabel debe ser un string y es obligatorio
+  children: PropTypes.node.isRequired // children puede ser cualquier cosa que React pueda renderizar y es obligatorio
+}
+//* Asigna un display name al componente Togglable
+// Esto ayuda a React DevTools y al linter (react/display-name)
+Togglable.displayName = 'Togglable'
 
 export default Togglable

@@ -35,7 +35,7 @@ const App = () => {
   }, []) // Se ejecuta solo una vez al montar el componente
 
 
-  //! useEffect para Cargar Blogs (ordenados por likes) 
+  //! useEffect para Cargar Blogs (ordenados por likes)
   // ¡IMPORTANTE! Asegúrate de que el backend siempre devuelva 'user' como un objeto populate, no solo como un ID.
   // Si el backend no lo hace, el blog.user.name fallará en el frontend.
   useEffect(() => {
@@ -243,11 +243,10 @@ const App = () => {
         {/* Muestra el nombre del usuario */}
         {user.name} logged in {' '}
         {/* Botón de cerrar sesión */}
-        <button onClick={handleLogout}>logout</button> 
-      </p> 
+        <button onClick={handleLogout}>logout</button>
+      </p>
       {/* Muestra el Togglable/BlogForm */}
       {blogForm()}
-      
       {blogs.map(blog =>
         <Blog
           key={blog.id}

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import React from 'react'
+import PropTypes from 'prop-types'
+
 
 /**
  * Componente BlogForm: Formulario para crear un nuevo blog.
@@ -67,6 +69,11 @@ const BlogForm = ({ createBlog }) => {
       </form>
     </div>
   )
+}
+
+//! Definición de PropTypes para el componente BlogForm
+BlogForm.propTypes = {
+  createBlog: PropTypes.func.isRequired // createBlog debe ser una función y es obligatoria
 }
 
 export default BlogForm
