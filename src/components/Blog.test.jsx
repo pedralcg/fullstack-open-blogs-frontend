@@ -2,6 +2,7 @@
 import React from 'react'
 import '@testing-library/jest-dom' // Para matchers como toBeInTheDocument, not.toBeInTheDocument
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event' // Importa userEvent para simular interacciones
 import Blog from './Blog' // Importa el componente Blog
 
 // Importaciones explícitas de Vitest: vi, test, expect, describe, beforeEach
@@ -37,7 +38,7 @@ describe('<Blog />', () => {
     )
   })
 
-  // Test 1: Verificar que el título y el autor se muestran por defecto
+  //* Test 1: Verificar que el título y el autor se muestran por defecto
   test('renders title and author, but not URL or likes by default', () => {
     // Buscar el título y el autor usando los data-testid
     const titleElement = screen.getByTestId('blog-title')
@@ -70,5 +71,30 @@ describe('<Blog />', () => {
     if (detailsSection) {
       expect(detailsSection).toHaveStyle('display: none')
     }
+  })
+
+  //* Test 2: Verificar que la URL y los likes se muestran al hacer clic en 'view'
+  test('URL and likes are shown when the "view" button is clicked', async () => {
+    const user = userEvent.setup() // Configura userEvent
+
+    // Encuentra el botón 'view'
+    const viewButton = screen.getByText('view')
+    // Simula un clic en el botón 'view'
+    await user.click(viewButton)
+
+    // Ahora, la URL y los likes deberían estar visibles (en el DOM)
+    const urlElement = screen.getByTestId('blog-url')
+    const likesElement = screen.getByTestId('blog-likes')
+
+    // Afirma que la URL y los likes están en el documento y muestran el contenido correcto
+    expect(urlElement).toBeInTheDocument()
+    expect(urlElement).toHaveTextContent(sampleBlog.url)
+    expect(likesElement).toBeInTheDocument()
+    expect(likesElement).toHaveTextContent(sampleBlog.likes) // Verifica que el número de likes sea el correcto
+
+    // Opcional: Verificar que la sección de detalles ahora está visible
+    const detailsSection = screen.getByTestId('blog-details-section')
+    expect(detailsSection).toBeInTheDocument()
+    expect(detailsSection).not.toHaveStyle('display: none') // Si usa display: none para ocultar
   })
 })
