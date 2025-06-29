@@ -58,11 +58,12 @@ const Blog = ({ blog, handleLike, handleDelete, currentUser }) => {
 
   return (
     // Contenedor principal del blog con los estilos definidos
-    <div style={blogStyle}>
-      <div>
+    <div style={blogStyle} className='blogItem'> {/* Clase CSS para el contenedor principal, si es necesaria para otros estilos */}
+      <div data-testid="blog-header"> {/* Contenedor de título, autor y botón de visibilidad */}
         {/* Muestra el título y el autor del blog */}
-        {blog.title} {blog.author}
-        {' '} {/* Espacio para separar el texto del botón */}
+        <span data-testid="blog-title">{blog.title}</span>{' '} {/* Título del blog */}
+        <span data-testid="blog-author">{blog.author}</span>
+        {' '}{/* Espacio para separar el texto del botón */}
         {/* Botón para alternar la visibilidad de los detalles */}
         <button onClick={toggleDetails}>
           {showDetails ? 'hide' : 'view'} {/* El texto del botón cambia según la visibilidad */}
@@ -72,10 +73,10 @@ const Blog = ({ blog, handleLike, handleDelete, currentUser }) => {
       {/* Renderizado condicional de los detalles del blog */}
       {/* Si showDetails es true, muestra la URL, los likes y el nombre del usuario que lo agregó. */}
       {showDetails && (
-        <div>
-          <p>{blog.url}</p>
+        <div data-testid="blog-details-section"> {/* Sección de detalles ocultos por defecto */}
+          <p data-testid="blog-url">{blog.url}</p> {/* URL del blog */}
           <p>
-            likes {blog.likes} {' '} {/* Muestra el número de likes */}
+            likes <span data-testid="blog-likes">{blog.likes}</span> {' '} {/* Likes del blog */}
             <button onClick={incrementLike}>like</button> {/* Botón de "like" */}
           </p>
           {/* Verifica si blog.user existe antes de intentar acceder a blog.user.name */}
