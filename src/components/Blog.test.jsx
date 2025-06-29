@@ -4,6 +4,8 @@ import '@testing-library/jest-dom' // Para matchers como toBeInTheDocument, not.
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event' // Importa userEvent para simular interacciones
 import Blog from './Blog' // Importa el componente Blog
+import BlogForm from './BlogForm' // Importa el componente BlogForm
+
 
 // Importaciones explícitas de Vitest: vi, test, expect, describe, beforeEach
 import { vi, test, expect, describe, beforeEach } from 'vitest'
@@ -117,5 +119,48 @@ describe('<Blog />', () => {
     // mock.calls es un array que contiene los argumentos de cada llamada a la función mock.
     // toHaveLength(2) verifica que se llamó dos veces.
     expect(mockHandleLike.mock.calls).toHaveLength(2)
+  })
+})
+
+// BLOQUE TESTS para el componente BlogForm
+describe('<BlogForm />', () => {
+  test('form calls the event handler with correct details when creating a new blog', async () => {
+    // 1. Crea una función mock para simular el controlador de eventos 'createBlog'
+    const createBlog = vi.fn()
+    // 2. Configura userEvent para simular interacciones de usuario
+    const user = userEvent.setup()
+
+    // 3. Renderiza el componente BlogForm, pasándole la función mock 'createBlog'
+    render(<BlogForm createBlog={createBlog} />)
+
+    // 4. Encuentra los campos de entrada y el botón de envío
+    // Se usa getByLabelText basándose en el texto visible que actúa como etiqueta.
+    // Si esto falla (depende de la implementación exacta de BlogForm y la versión de testing-library),
+    // se podría usar screen.getAllByRole('textbox') y acceder por índice.
+    const titleInput = screen.getByLabelText('title:')
+    const authorInput = screen.getByLabelText('author:')
+    const urlInput = screen.getByLabelText('url:')
+    const sendButton = screen.getByText('create') // El botón de submit del formulario
+
+    // 5. Simula la escritura en los campos de entrada
+    await user.type(titleInput, 'Testing a new blog form')
+    await user.type(authorInput, 'Form Tester')
+    await user.type(urlInput, 'http://test.com/new-blog')
+
+    // 6. Simula el clic en el botón de submit
+    await user.click(sendButton)
+
+    // 7. Afirma que la función mock 'createBlog' fue llamada exactamente una vez
+    expect(createBlog.mock.calls).toHaveLength(1)
+
+    // 8. Afirma que la función 'createBlog' fue llamada con el objeto de blog correcto
+    // mock.calls[0] accede a la primera llamada
+    // mock.calls[0][0] accede al primer argumento de esa llamada (que debería ser el objeto blog)
+    expect(createBlog.mock.calls[0][0].title).toBe('Testing a new blog form')
+    expect(createBlog.mock.calls[0][0].author).toBe('Form Tester')
+    expect(createBlog.mock.calls[0][0].url).toBe('http://test.com/new-blog')
+    // Nota: La propiedad 'likes' generalmente la asigna el backend por defecto (a 0)
+    // si no se proporciona desde el frontend, por lo que no la probamos aquí a menos que
+    // el formulario la gestione explícitamente.
   })
 })

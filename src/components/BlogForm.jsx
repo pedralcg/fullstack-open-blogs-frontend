@@ -39,8 +39,9 @@ const BlogForm = ({ createBlog }) => {
       <h2>create new</h2>
       <form onSubmit={addBlog}> {/* Usa la función local addBlog */}
         <div>
-          title:
+          <label htmlFor="title-input">title:</label>
           <input
+            id="title-input" // El id debe coincidir con el htmlFor de la etiqueta label
             type="text"
             value={newTitle}
             name="Title"
@@ -48,8 +49,9 @@ const BlogForm = ({ createBlog }) => {
           />
         </div>
         <div>
-          author:
+          <label htmlFor="author-input">author:</label>
           <input
+            id="author-input" // El id debe coincidir con el htmlFor de la etiqueta label
             type="text"
             value={newAuthor}
             name="Author"
@@ -57,8 +59,9 @@ const BlogForm = ({ createBlog }) => {
           />
         </div>
         <div>
-          url:
+          <label htmlFor="url-input">url:</label>
           <input
+            id="url-input" // El id debe coincidir con el htmlFor de la etiqueta label
             type="text"
             value={newUrl}
             name="Url"
