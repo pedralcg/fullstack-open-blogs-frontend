@@ -97,4 +97,25 @@ describe('<Blog />', () => {
     expect(detailsSection).toBeInTheDocument()
     expect(detailsSection).not.toHaveStyle('display: none') // Si usa display: none para ocultar
   })
+
+  //* Test 3: Verificar que el controlador de eventos de 'like' se llama dos veces al hacer clic dos veces
+  test('clicking the like button twice calls the event handler twice', async () => {
+    const user = userEvent.setup() // Configura userEvent
+
+    // 1. Encuentra el botón 'view' y haz clic en él para mostrar el botón 'like'
+    const viewButton = screen.getByText('view')
+    await user.click(viewButton)
+
+    // 2. Encuentra el botón 'like' (ahora visible)
+    const likeButton = screen.getByText('like')
+
+    // 3. Haz clic en el botón 'like' dos veces
+    await user.click(likeButton)
+    await user.click(likeButton)
+
+    // 4. Afirma que mockHandleLike ha sido llamado exactamente dos veces
+    // mock.calls es un array que contiene los argumentos de cada llamada a la función mock.
+    // toHaveLength(2) verifica que se llamó dos veces.
+    expect(mockHandleLike.mock.calls).toHaveLength(2)
+  })
 })
